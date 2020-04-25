@@ -25,7 +25,7 @@ bool Client::setup(std::string uri)
 	DWORD getAddrRes = getaddrinfo(uri.c_str(), NULL, &(this->hints), &targetAdressInfo);
 	if (getAddrRes != 0 || targetAdressInfo == NULL)
 	{
-		std::cout << "Could not resolve the Host Name" << std::endl;
+		std::cout << "Could not resolve the Host Name with error: " << gai_strerror(getAddrRes) << std::endl;
 		//WSACleanup();
 		return -1;
 	}
@@ -64,32 +64,41 @@ bool Client::setup(std::string uri)
 	std::cout << "Connected.\n";
 }
 
-bool Client::sendbytes()
+Payload* Client::doGet()
 {
 	// Sending a HTTP-GET-Request to the Web Server
 	std::string httpRequest = "GET / HTTP/1.1\r\nHost: " + uri + "\r\nConnection: close\r\n\r\n";
 	int sentBytes = send(cnx, httpRequest.c_str(), httpRequest.length(), 0);
+
+	Payload* payload;
+
 	if (sentBytes < httpRequest.length() || sentBytes == SOCKET_ERROR)
 	{
 		std::cout << "Could not send the request to the Server" << std::endl;
-		system("pause");
+		payload = new Payload();
 		closesocket(cnx);
 		//WSACleanup();
-		return -1;
 	}
-
-	// Receiving and Displaying an answer from the Web Server
-	char buffer[10000];
-	SecureZeroMemory(buffer, sizeof(buffer));
-	int dataLen;
-	while ((dataLen = recv(cnx, buffer, sizeof(buffer), 0) > 0))
+	else
 	{
-		int i = 0;
-		while (buffer[i] >= 32 || buffer[i] == '\n' || buffer[i] == '\r') {
-			std::cout << buffer[i];
-			i += 1;
+		// Receiving and Displaying an answer from the Web Server
+		char buffer[10000];
+		SecureZeroMemory(buffer, sizeof(buffer));
+		int dataLen;
+		payload = new Payload();
+		while ((dataLen = recv(cnx, buffer, sizeof(buffer), 0) > 0))
+		{
+			payload->append(buffer);
+			/*int i = 0;
+			while (buffer[i] >= 32 || buffer[i] == '\n' || buffer[i] == '\r') {
+				std::cout << buffer[i];
+				i += 1;
+			}
+			*/
 		}
 	}
+
+	return payload;
 }
 
 bool Client::close()

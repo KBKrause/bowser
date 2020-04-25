@@ -5,22 +5,27 @@
 #include <windows.h>
 #include <iostream>
 #include <string>
+#include "Payload.h"
 
 class Client
 {
-public:
+	public:
 
-	Client(std::string uri);
-	bool sendbytes();
-	bool close();
+		Client(std::string uri);
 
-	~Client();
+		// Executes a GET request.
+		Payload* doGet();
 
-private:
 
-	std::string uri;
-	addrinfo hints;
-	SOCKET cnx;
+		bool close();
 
-	bool setup(std::string uri);
+		~Client();
+
+	private:
+
+		std::string uri;
+		addrinfo hints;
+		SOCKET cnx;
+
+		bool setup(std::string uri);
 };

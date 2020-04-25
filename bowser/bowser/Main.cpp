@@ -5,6 +5,7 @@
 #include "Client.h"
 #pragma comment(lib,"ws2_32.lib")
 using namespace std;
+
 int main() 
 {
 	// Initialize Dependencies to the Windows Socket.
@@ -15,10 +16,15 @@ int main()
 		return -1;
 	}
 
-	Client* myClient = new Client("www.google.com");
-	myClient->sendbytes();
+	string site = "";
+
+	cout << "Enter the website you want to send a GET request to: ";
+	cin >> site;
+
+	Client* myClient = new Client(site);
+	Payload* pl = myClient->doGet();
+	pl->print();
 
 	WSACleanup();
-	system("pause");
 	return 0;
 }
